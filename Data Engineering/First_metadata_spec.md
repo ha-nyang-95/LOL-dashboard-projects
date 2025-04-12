@@ -1,3 +1,4 @@
+![alt text](image1.png)
 # < 메타 데이터 >
 ## 1. < base >
 - `info.endOfGameResult`: 게임이 끝난 방식. (e.g. 탈주, 승리, 서렌, etc)
