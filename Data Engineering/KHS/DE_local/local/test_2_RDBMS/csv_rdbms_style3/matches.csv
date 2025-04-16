@@ -1,2 +1,3 @@
-match_id,match_number,game_id,data_version,end_of_game_result,frame_interval
-KR_7585490799,7585490799,7585490799,2,GameComplete,60000
+version https://git-lfs.github.com/spec/v1
+oid sha256:d8accbe3557a1590e53d382ef612bf2836a3bbaeb07cd0dd7ba1b278971ef641
+size 134
