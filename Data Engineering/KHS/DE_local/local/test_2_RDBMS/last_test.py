@@ -9,6 +9,7 @@ with open("제철대방어_CLASSIC_10경기_timeline.json", "r", encoding="utf-8
 
 # 저장 경로
 output_dir = Path("./specific_data")
+
 output_dir.mkdir(exist_ok=True)
 
 # 누적 리스트 초기화
