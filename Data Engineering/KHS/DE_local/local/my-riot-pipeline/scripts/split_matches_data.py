@@ -177,20 +177,20 @@ pd.DataFrame(event_victim_damage_received_rows).to_csv(output_dir / "event_victi
 events_df = pd.DataFrame(events_rows)
 events_df.to_csv(output_dir / "events.csv", index=False)
 
-type_groups = {}
-for event_type, group_df in events_df.groupby("type"):
-    used_cols = tuple(sorted([col for col in group_df.columns if group_df[col].notna().any()]))
-    if used_cols not in type_groups:
-        type_groups[used_cols] = []
-    type_groups[used_cols].append(event_type)
+# type_groups = {}
+# for event_type, group_df in events_df.groupby("type"):
+#     used_cols = tuple(sorted([col for col in group_df.columns if group_df[col].notna().any()]))
+#     if used_cols not in type_groups:
+#         type_groups[used_cols] = []
+#     type_groups[used_cols].append(event_type)
 
-split_dir = output_dir / "events_split_by_type"
-split_dir.mkdir(exist_ok=True)
+# split_dir = output_dir / "events_split_by_type"
+# split_dir.mkdir(exist_ok=True)
 
-for used_cols, types in type_groups.items():
-    filename = f"events__{'__'.join(types)}.csv"
-    filtered_df = events_df[events_df["type"].isin(types)][list(used_cols)]
-    filtered_df.to_csv(split_dir / filename, index=False)
+# for used_cols, types in type_groups.items():
+#     filename = f"events__{'__'.join(types)}.csv"
+#     filtered_df = events_df[events_df["type"].isin(types)][list(used_cols)]
+#     filtered_df.to_csv(split_dir / filename, index=False)
 
 print(f"\n✅ CSV 파일이 성공적으로 저장되었습니다. 메인 경로: {output_dir.resolve()}")
 print(f"🪓 events 테이블은 type별로 {len(type_groups)}개로 분할됨. 폴더: {split_dir.resolve()}")

@@ -1,3 +1,4 @@
-pandas
-tqdm
-kafka-python
+pandas==2.2.3
+tqdm==4.67.1
+kafka-python==2.1.5
+psycopg2-binary==2.9.10 

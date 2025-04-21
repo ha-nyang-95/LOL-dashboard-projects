@@ -1,0 +1,4 @@
+pyspark==3.5.1
+kafka-python==2.1.5
+pandas==2.2.3
+tqdm==4.67.1

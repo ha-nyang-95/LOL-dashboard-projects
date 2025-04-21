@@ -49,9 +49,11 @@ def lol_tier(tier):
     return rate_limited_get(url, headers)
 
 # 소환사별 매치 ID 가져오기
+
 def match_list(puuid, start=0, count=20):
-    startTime = 1743811200  # 2025-04-05 00:00:00 UTC
-    endTime = 1743897600    # 2025-04-06 00:00:00 UTC
+    endTime = int(time.time())  # 현재 시각 (초 단위 UTC 타임스탬프)
+    startTime = endTime - 600   # 10분 전
+
     url = (
         f"https://asia.api.riotgames.com/lol/match/v5/matches/by-puuid/{puuid}/ids"
         f"?startTime={startTime}&endTime={endTime}&type=ranked&start={start}&count={count}"
