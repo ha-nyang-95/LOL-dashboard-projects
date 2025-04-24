@@ -1,0 +1,74 @@
+
+services:
+  # ---------- Zookeeper & Kafka ----------
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    environment:
+      - ALLOW_ANONYMOUS_LOGIN=yes
+    ports: [ "2181:2181" ]
+
+  kafka:
+    image: bitnami/kafka:3.6
+    depends_on: [ zookeeper ]
+    environment:
+      - KAFKA_BROKER_ID=1
+      - KAFKA_CFG_ZOOKEEPER_CONNECT=zookeeper:2181
+      - KAFKA_CFG_LISTENERS=PLAINTEXT://:9092
+      - KAFKA_CFG_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092
+      - ALLOW_PLAINTEXT_LISTENER=yes
+    ports: [ "9092:9092" ]
+
+  # ---------- PostgreSQL ----------
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_USER=${PG_USER}
+      - POSTGRES_PASSWORD=${PG_PW}
+      - POSTGRES_DB=${PG_DB}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./init_db:/docker-entrypoint-initdb.d     # 테이블 생성용 DDL
+    ports: [ "5432:5432" ]
+
+  # ---------- Apache Airflow ----------
+  airflow:
+    build: ./airflow
+    depends_on: [ postgres, kafka ]
+    command: >
+      bash -c "
+        airflow db init || true &&
+        airflow db upgrade &&
+        airflow users create --username admin --firstname admin --lastname admin --role Admin --email admin@example.com --password admin || true &&
+        airflow scheduler & airflow webserver"
+  environment:
+      - AIRFLOW__CORE__EXECUTOR=LocalExecutor
+      - AIRFLOW__CORE__FERNET_KEY=${FERNET_KEY}
+      - AIRFLOW__DATABASE__SQL_ALCHEMY_CONN=postgresql://${PG_USER}:${PG_PW}@postgres:5432/${PG_DB}
+      - KAFKA_BOOTSTRAP=kafka:9092
+      - PG_CONN_STR=jdbc:postgresql://postgres:5432/${PG_DB}
+      - PG_USER=${PG_USER}
+      - PG_PW=${PG_PW}
+    volumes:
+      - ./scripts:/opt/airflow/scripts   # DAG가 호출할 스크립트
+      - ./airflow/dags:/opt/airflow/dags
+    ports: [ "8080:8080" ]
+
+  # ---------- Spark (Structured Streaming) ----------
+  spark:
+    build: ./spark
+    command: >
+      bash -c "
+      pip install -r /opt/spark-app/requirements.txt && spark-submit --packages org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1 --master local[2] /opt/spark-app/kafka_consumer_to_pg.py"
+    depends_on: [ kafka ]
+    environment:
+      - PYTHONUNBUFFERED=1
+      - KAFKA_BOOTSTRAP=kafka:9092
+      - PG_JDBC=jdbc:postgresql://postgres:5432/${PG_DB}
+      - PG_USER=${PG_USER}
+      - PG_PW=${PG_PW}
+    volumes:
+      - ./spark:/opt/spark-app
+    ports: [ "4040:4040" ]   # Spark UI
+
+volumes:
+  pgdata:
